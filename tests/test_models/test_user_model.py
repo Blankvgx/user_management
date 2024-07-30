@@ -226,3 +226,14 @@ async def test_user_first_name_update(db_session: AsyncSession, user: User):
     await db_session.commit()
     await db_session.refresh(user)
     assert user.first_name == new_first_name, "User first name should update correctly"
+
+@pytest.mark.asyncio
+async def test_profile_picture_url_format(db_session: AsyncSession, user: User):
+    """
+    Tests that the profile picture URL follows the correct format.
+    """
+    profile_pic_url = "http://example.com/profile.jpg"
+    user.profile_picture_url = profile_pic_url
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.profile_picture_url.startswith("http://") or user.profile_picture_url.startswith("https://"), "Profile picture URL should start with 'http://' or 'https://'"
