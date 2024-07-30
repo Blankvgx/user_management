@@ -139,3 +139,107 @@ async def test_update_user_role(db_session: AsyncSession, user: User):
     await db_session.commit()
     await db_session.refresh(user)
     assert user.role == UserRole.ADMIN, "Role update should persist correctly in the database"
+
+@pytest.mark.asyncio
+async def test_user_registration_timestamp(db_session: AsyncSession, user: User):
+    """
+    Tests that the registration timestamp is set correctly.
+    """
+    registration_time = datetime.now(timezone.utc)
+    user.created_at = registration_time
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.created_at == registration_time, "Registration timestamp should be set correctly"
+
+@pytest.mark.asyncio
+async def test_user_profile_update(db_session: AsyncSession, user: User):
+    """
+    Tests that user profile updates persist correctly.
+    """
+    new_bio = "This is an updated bio."
+    user.bio = new_bio
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.bio == new_bio, "User bio should update correctly"
+
+@pytest.mark.asyncio
+async def test_user_deletion(db_session: AsyncSession, user: User):
+    """
+    Tests that a user can be deleted successfully.
+    """
+    await UserService.delete(db_session, user.id)
+    deleted_user = await UserService.get_by_id(db_session, user.id)
+    assert deleted_user is None, "User should be deleted successfully"
+
+@pytest.mark.asyncio
+async def test_user_email_update(db_session: AsyncSession, user: User):
+    """
+    Tests updating the user's email and ensuring it persists correctly.
+    """
+    new_email = "newemail@example.com"
+    user.email = new_email
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.email == new_email, "User email should update correctly"
+
+@pytest.mark.asyncio
+async def test_user_nickname_update(db_session: AsyncSession, user: User):
+    """
+    Tests updating the user's nickname and ensuring it persists correctly.
+    """
+    new_nickname = "newnickname"
+    user.nickname = new_nickname
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.nickname == new_nickname, "User nickname should update correctly"
+
+@pytest.mark.asyncio
+async def test_user_location_update(db_session: AsyncSession, user: User):
+    """
+    Tests updating the user's location and ensuring it persists correctly.
+    """
+    new_location = "New City"
+    user.location = new_location
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.location == new_location, "User location should update correctly"
+
+@pytest.mark.asyncio
+async def test_user_creation(db_session: AsyncSession):
+    """
+    Tests creating a new user and ensuring the data persists correctly.
+    """
+    new_user = User(
+        email="testuser@example.com",
+        first_name="Test",
+        last_name="User",
+        role=UserRole.AUTHENTICATED,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    db_session.add(new_user)
+    await db_session.commit()
+    await db_session.refresh(new_user)
+    assert new_user.id is not None, "New user should be created successfully"
+
+@pytest.mark.asyncio
+async def test_user_last_name_update(db_session: AsyncSession, user: User):
+    """
+    Tests updating the user's last name and ensuring it persists correctly.
+    """
+    new_last_name = "NewLastName"
+    user.last_name = new_last_name
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.last_name == new_last_name, "User last name should update correctly"
+
+@pytest.mark.asyncio
+async def test_user_first_name_update(db_session: AsyncSession, user: User):
+    """
+    Tests updating the user's first name and ensuring it persists correctly.
+    """
+    new_first_name = "NewFirstName"
+    user.first_name = new_first_name
+    await db_session.commit()
+    await db_session.refresh(user)
+    assert user.first_name == new_first_name, "User first name should update correctly"
