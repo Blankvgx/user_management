@@ -108,6 +108,32 @@ async def update_user(user_id: UUID, user_update: UserUpdate, request: Request, 
         links=create_user_links(updated_user.id, request)
     )
 
+@router.put("/users/{user_id}/profile", response_model=UserResponse)
+async def update_profile(user_id: UUID, user_update: UserUpdate, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    if current_user["id"] != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this profile")
+    
+    updated_user = await UserService.update(db, user_id, user_update.dict(exclude_unset=True))
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return UserResponse.from_orm(updated_user)
+
+@router.put("/users/{user_id}/upgrade", response_model=UserResponse)
+async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_db), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
+    user = await UserService.get_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    user.is_professional = True
+    await db.commit()
+    await db.refresh(user)
+    
+    # Send notification to user
+    # await send_notification(user.email, "Your status has been upgraded to professional")
+    
+    return UserResponse.from_orm(user)
+
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, name="delete_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
