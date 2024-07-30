@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user_model import User, UserRole
+from app.services.user_service import UserService
 
 @pytest.mark.asyncio
 async def test_user_role(db_session: AsyncSession, user: User, admin_user: User, manager_user: User):
@@ -213,6 +214,7 @@ async def test_user_creation(db_session: AsyncSession):
         email="testuser@example.com",
         first_name="Test",
         last_name="User",
+        nickname="testnickname",  # Added the nickname field to avoid NotNullViolationError
         role=UserRole.AUTHENTICATED,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
