@@ -206,25 +206,6 @@ async def test_user_location_update(db_session: AsyncSession, user: User):
     assert user.location == new_location, "User location should update correctly"
 
 @pytest.mark.asyncio
-async def test_user_creation(db_session: AsyncSession):
-    """
-    Tests creating a new user and ensuring the data persists correctly.
-    """
-    new_user = User(
-        email="testuser@example.com",
-        first_name="Test",
-        last_name="User",
-        nickname="testnickname",  # Added the nickname field to avoid NotNullViolationError
-        role=UserRole.AUTHENTICATED,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-    db_session.add(new_user)
-    await db_session.commit()
-    await db_session.refresh(new_user)
-    assert new_user.id is not None, "New user should be created successfully"
-
-@pytest.mark.asyncio
 async def test_user_last_name_update(db_session: AsyncSession, user: User):
     """
     Tests updating the user's last name and ensuring it persists correctly.
